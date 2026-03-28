@@ -91,3 +91,25 @@ const loginUser = async (req,res) => {
     }
 };
 
+const getMe = async (req,res) => {
+    try {
+        const user = await User.findById(req.user.id).select('-passwordHash');
+        if(!user){
+            return res.status(404).json({
+                message: "User not find in the database."
+            });
+        }
+        res.json(userPayLoad(user));
+    } catch (err) {
+        res.status(500).json({
+            message: 'Server Error',
+            error: err.message
+        });
+    }
+};
+
+module.exports = {
+    registerUser,
+    loginUser,
+    getMe
+}
