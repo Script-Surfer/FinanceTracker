@@ -4,19 +4,20 @@ const User = require('../models/user.models');
 
 // helpers
 const signToken = (user) => {
-    jwt.sign(
+    return jwt.sign(
         {id: user._id, email: user.email},
         process.env.JWT_SECRET,
         {expiresIn: '7d'}
     );
-
-    const userPayLoad = (user) => ({
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        currency: user.currency
-    });
 }
+
+const userPayLoad = (user) => ({
+    _id: user._id,
+    name: user.name,
+    email: user.email,
+    currency: user.currency
+});
+
 
 const registerUser = async (req,res) => {
     try {
@@ -28,13 +29,13 @@ const registerUser = async (req,res) => {
             });
         }
 
-        if(password.length() < 6){
+        if(password.length < 6){
             return res.status(400).json({
                 message: "Password must be of 6 charachters long."
             });
         }
 
-        if(password !== confitmPassword){
+        if(password !== confirmPassword){
             return res.status(400).json({
                 message: "Password didn't match."
             });
@@ -53,7 +54,7 @@ const registerUser = async (req,res) => {
         const user = await User.create({ name, email, passwordHash});
         const token = signToken(user);
 
-        res.status(201).json({ token, user: userPayLoad(User)});
+        res.status(201).json({ token, user: userPayLoad(user)});
     } catch (err) {
         res.status(500).json({ message: 'Server Error', error: err.message});
     }
@@ -70,14 +71,14 @@ const loginUser = async (req,res) => {
             });
         }
 
-        const user = User.findOne({ email: email.toLowerCase()});
+        const user = await User.findOne({ email: email.toLowerCase()});
         if(!user){
             return res.status(401).json({
                 message: 'Invalid email or password.'
             });
         }
 
-        const isMatch = await bcrypt.compare(password, passwordHash);
+        const isMatch = await bcrypt.compare(password, user.passwordHash);
         if(!isMatch){
             return res.status(401).json({
                 message: 'Invalid email or password.'
@@ -85,7 +86,7 @@ const loginUser = async (req,res) => {
         }
 
         const token = signToken(user);
-        res.json({ token, user: userPayload(user) });
+        res.json({ token, user: userPayLoad(user) });
     } catch (err) {
         return res.status(500).json({ message: 'server error', error: err.message});
     }
