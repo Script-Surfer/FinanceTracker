@@ -58,3 +58,36 @@ const registerUser = async (req,res) => {
         res.status(500).json({ message: 'Server Error', error: err.message});
     }
 };
+
+
+const loginUser = async (req,res) => {
+    try {
+        const {email, password} = req.body;
+
+        if(!email || !password){
+            return res.status(400).json({
+                message: 'email and password are required.'
+            });
+        }
+
+        const user = User.findOne({ email: email.toLowerCase()});
+        if(!user){
+            return res.status(401).json({
+                message: 'Invalid email or password.'
+            });
+        }
+
+        const isMatch = await bcrypt.compare(password, passwordHash);
+        if(!isMatch){
+            return res.status(401).json({
+                message: 'Invalid email or password.'
+            });
+        }
+
+        const token = signToken(user);
+        res.json({ token, user: userPayload(user) });
+    } catch (err) {
+        return res.status(500).json({ message: 'server error', error: err.message});
+    }
+};
+
