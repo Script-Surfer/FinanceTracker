@@ -84,3 +84,51 @@ const createTransaction = async (req,res) => {
         });
     }
 };
+
+const updateTransaction = async (req,res) => {
+    try {
+        const transaction = await Transaction.findOne({
+            _id: req.params.id,
+            userId: req.user.id,
+        });
+
+        if(!transaction){
+            return res.status(404).json({
+                message: 'Transaction not found.'
+            });
+        }
+
+        const {amount,type,category,description,date} = req.body;
+
+        if(type && !['income','expense'].includes(type)){
+            return res.status(400).json({
+                message: "type must be income or expense."
+            });
+        }
+
+        if(category && ![CATEGORIES].includes(type)){
+            return res.status(400).json({
+                message: "Invalid category."
+            });
+        }
+
+        if(amount !== undefined && Number(amount) <= 0){
+            return res.status(400).json({
+                message: "Number should be positive."
+            });
+        }
+
+        transaction.amount = amount ? Number(amount) : transaction.amount;
+        transaction.type = type || transaction.type;
+        transaction.category = category || transaction.category;
+        transaction.description = description ?? transaction.description;
+        transaction.date = date ? new Date(date) : transaction.date;
+
+        await transaction.save();
+        res.json(transaction);
+    } catch (err) {
+        res.status(500).json({
+            message: 'server error', error: err.message
+        });
+    }
+};
