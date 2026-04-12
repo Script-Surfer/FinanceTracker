@@ -155,3 +155,46 @@ const deleteTransaction = async (req,res) => {
         });
     }
 };
+
+const getSummary = async (req, res) => {
+  try {
+    const now   = new Date();
+    const start = new Date(now.getFullYear(), now.getMonth(), 1);
+    const end   = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
+    const result = await Transaction.aggregate([
+      {
+        $match: {
+          userId: req.user.id,
+          date:   { $gte: start, $lte: end },
+        },
+      },
+      {
+        $group: {
+          _id:   '$type',
+          total: { $sum: '$amount' },
+        },
+      },
+    ]);
+
+    const income   = result.find(r => r._id === 'income')?.total  || 0;
+    const expenses = result.find(r => r._id === 'expense')?.total || 0;
+
+    res.json({
+      income,
+      expenses,
+      balance:     income - expenses,
+      savingsRate: income > 0 ? (((income - expenses) / income) * 100).toFixed(1) : 0,
+    });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+
+module.exports = {
+    getTransactions,
+    createTransaction,
+    updateTransaction,
+    deleteTransaction,
+    getSummary
+};
