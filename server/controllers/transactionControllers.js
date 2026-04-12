@@ -132,3 +132,26 @@ const updateTransaction = async (req,res) => {
         });
     }
 };
+
+const deleteTransaction = async (req,res) => {
+    try {
+        const transaction = await Transaction.findOneAndDelete({
+            _id: req.params.id,
+            userId: req.user.id,
+        });
+
+        if(!transaction){
+            return res.status(400).json({
+                message: "Transaction not found."
+            });
+        }
+
+        res.json({
+            message: "Transaction deleted."
+        });
+    } catch (err) {
+        res.status(500).json({
+            message: 'server error', error: err.message
+        });
+    }
+};
