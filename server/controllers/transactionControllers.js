@@ -39,3 +39,48 @@ const getTransactions = async (req,res) => {
         res.status(500).json({ message: 'Server error', error: err.message });
     }
 };
+
+const createTransaction = async (req,res) => {
+    try {
+        const {amount,type,category,description,date} = req.body();
+
+        if(!amount || !type || !category || !description || !date){
+            return res.status(400).json({
+                message: "Amount,type,date,description,category is missing."
+            })
+        }
+
+        if(!['income','expense'].includes(type)){
+            return res.status(400).json({
+                message: "Type must be income or expense."
+            })
+        }
+
+        if(![CATEGORIES].includes(category)){
+            return res.status(400).json({
+                message: "Category must from the defined list."
+            })
+        }
+
+        if(Number(amount) <= 0){
+            return res.status(400).json({
+                message: "Amount must be positive Number."
+            })
+        }
+
+        const transaction = await Transaction.create({
+            userId: req.user.id,
+            amount: Number(amount),
+            type,
+            category,
+            description: description || '',
+            date: new Date(date),
+        });
+
+        res.status(201).json(transaction);
+    } catch (err) {
+        res.status(500).json({
+            message: 'Server error', error: err.message
+        });
+    }
+};
