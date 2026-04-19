@@ -44,4 +44,39 @@ const getBudgets = async (req,res) => {
     } catch (err) {
         res.status(500).json({ message: 'Server error', error: err.message });
     }
-}
+};
+
+const upsertBudget = async (req,res) => {
+    try {
+        const {category, limitAmount} = req.body;
+        
+        if(!category || !limitAmount){
+            return res.status(400).json({
+                message: "Category and limit Amount are required."
+            });
+        }
+
+        if(Number(limitAmount) <= 0){
+            return res.status(400).json({
+                message: "Limit amount must be positive."
+            });
+        }
+
+        const now   = new Date();
+        const month = now.getMonth() + 1;
+        const year  = now.getFullYear();
+
+        const budget = await Budget.findOneAndUpdate(
+            {userId: req.user.id, category, month, year},
+            {limitAmount: Number(limitAmount)},
+            {new: true, upsert: true, runValidators: true}
+        );
+
+        res.status(201).json(budget);
+    } catch (err) {
+        res.status(500).json({
+            message: "Server Error",
+            error: err.message
+        });
+    }
+};
