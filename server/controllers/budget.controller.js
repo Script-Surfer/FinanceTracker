@@ -80,3 +80,30 @@ const upsertBudget = async (req,res) => {
         });
     }
 };
+
+const deleteBudget = async (req,res) => {
+    try {
+        const budget = await Budget.findOneAndDelete({
+            _id: req.params.id,
+            userId: req.user.id
+        });
+
+        if(!budget){
+            return res.status(404).json({
+                message: 'Server Error',
+                error: err.message
+            });
+        }
+    } catch (err) {
+        return res.status(500).json({
+            message: "Server error",
+            error: err.message
+        })
+    }
+};
+
+module.exports = {
+    getBudgets,
+    upsertBudget,
+    deleteBudget
+};
