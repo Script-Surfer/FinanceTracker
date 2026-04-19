@@ -42,7 +42,7 @@ const getTransactions = async (req,res) => {
 
 const createTransaction = async (req,res) => {
     try {
-        const {amount,type,category,description,date} = req.body();
+        const {amount,type,category,description,date} = req.body;
 
         if(!amount || !type || !category || !description || !date){
             return res.status(400).json({
@@ -56,7 +56,7 @@ const createTransaction = async (req,res) => {
             })
         }
 
-        if(![CATEGORIES].includes(category)){
+        if(!CATEGORIES.includes(category)){
             return res.status(400).json({
                 message: "Category must from the defined list."
             })
@@ -87,10 +87,13 @@ const createTransaction = async (req,res) => {
 
 const updateTransaction = async (req,res) => {
     try {
-        const transaction = await Transaction.findOne({
-            _id: req.params.id,
-            userId: req.user.id,
-        });
+        // const transaction = await Transaction.findOne({
+        //     _id: req.params.id,
+        //     userId: req.user._id,
+        // });
+
+        const transaction = await Transaction.findById(req.params.id);
+        console.log(transaction);
 
         if(!transaction){
             return res.status(404).json({

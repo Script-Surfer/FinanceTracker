@@ -12,7 +12,7 @@ const {
 router.get('/summary',protect,getSummary);
 router.get('/',protect,getTransactions);
 router.post('/',protect,createTransaction);
-router.post('/:id',protect,updateTransaction);
+router.put('/:id',protect,updateTransaction);
 router.delete('/:id',protect,deleteTransaction);
 
 module.exports = router;

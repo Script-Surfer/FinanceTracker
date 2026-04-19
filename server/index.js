@@ -13,8 +13,8 @@ app.use(express.json());
 
 // Routes (we'll fill these in Phase 2 & 3)
 app.use('/api/auth',         require('./routes/auth.routes'));
-// app.use('/api/transactions', require('./routes/transactions.routes'));
-// app.use('/api/budgets',      require('./routes/budgets.routes'));
+app.use('/api/transactions', require('./routes/transactions.routes'));
+app.use('/api/budgets',      require('./routes/budgets.routes'));
 // app.use('/api/upload',       require('./routes/uploads.routes'));
 
 // Health check
