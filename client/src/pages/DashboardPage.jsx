@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   PieChart, Pie, Cell, Tooltip, ResponsiveContainer,
   LineChart, Line, XAxis, YAxis, CartesianGrid, Legend,
@@ -76,8 +76,8 @@ const DashboardPage = () => {
       <div className="main-content">
 
         {overBudget.length > 0 && (
-          <div className="animate-in" style={{ background: 'var(--expense-bg)', border: '1px solid var(--expense-border)', borderRadius: 'var(--radius-md)', padding: '14px 18px', marginBottom: 20, display: 'flex', gap: 10, alignItems: 'center', color: 'var(--expense)' }}>
-            <span style={{ fontSize: 20 }}>Warning:</span>
+          <div className="alert-banner animate-in" style={{ background: 'var(--expense-bg)', border: '1px solid var(--expense-border)', borderRadius: 'var(--radius-md)', padding: '14px 18px', marginBottom: 20, color: 'var(--expense)' }}>
+            <span style={{ fontSize: 20, flexShrink: 0 }}>⚠️</span>
             <div>
               <strong>Over budget this month: </strong>
               {overBudget.map((b, i) => (
@@ -171,8 +171,8 @@ const DashboardPage = () => {
             </div>
 
             <div className="animate-in animate-in-delay-3">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                <h2 style={{ fontSize: 16, fontWeight: 600 }}>Recent Transactions</h2>
+              <div className="section-row">
+                <h2>Recent Transactions</h2>
                 <Link to="/transactions" className="btn btn-ghost btn-sm">View all</Link>
               </div>
               <div className="table-container">
@@ -182,7 +182,7 @@ const DashboardPage = () => {
                   </div>
                 ) : (
                   <div className="table-responsive">
-                    <table className="table">
+                    <table className="table table-card-mobile">
                       <thead>
                         <tr>
                           <th>Date</th>
@@ -195,11 +195,11 @@ const DashboardPage = () => {
                       <tbody>
                         {recentTx.map(tx => (
                           <tr key={tx._id}>
-                            <td>{new Date(tx.date).toLocaleDateString()}</td>
-                            <td style={{ color: 'var(--text-primary)' }}>{tx.description || '-'}</td>
-                            <td><span className="badge badge-category">{tx.category}</span></td>
-                            <td><span className={`badge badge-${tx.type}`}>{tx.type}</span></td>
-                            <td style={{ fontWeight: 600, color: tx.type === 'income' ? 'var(--income)' : 'var(--expense)' }}>
+                            <td data-label="Date">{new Date(tx.date).toLocaleDateString()}</td>
+                            <td data-label="Description" style={{ color: 'var(--text-primary)' }}>{tx.description || '-'}</td>
+                            <td data-label="Category"><span className="badge badge-category">{tx.category}</span></td>
+                            <td data-label="Type"><span className={`badge badge-${tx.type}`}>{tx.type}</span></td>
+                            <td data-label="Amount" style={{ fontWeight: 600, color: tx.type === 'income' ? 'var(--income)' : 'var(--expense)' }}>
                               {tx.type === 'income' ? '+' : '-'}{currency}{tx.amount.toLocaleString()}
                             </td>
                           </tr>

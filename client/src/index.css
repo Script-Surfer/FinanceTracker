@@ -1557,3 +1557,331 @@ a:hover {
   }
 }
 
+/* ═══════════════════════════════════════════════════════
+   RESPONSIVE ENHANCEMENTS — comprehensive mobile-first
+   ═══════════════════════════════════════════════════════ */
+
+/* ── Navbar: hide user greeting on tablet ─────────────── */
+@media (max-width: 900px) {
+  .navbar-user {
+    display: none;
+  }
+}
+
+/* ── Page header: stack on small screens ─────────────── */
+@media (max-width: 480px) {
+  .page-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .page-header .btn {
+    width: 100%;
+    justify-content: center;
+  }
+  .page-title {
+    font-size: 20px;
+  }
+}
+
+/* ── Summary cards: scale font on tiny screens ────────── */
+@media (max-width: 360px) {
+  .summary-card {
+    padding: 16px;
+  }
+  .summary-value {
+    font-size: 22px;
+  }
+}
+
+/* ── Alert banner helper class ────────────────────────── */
+.alert-banner {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  word-break: break-word;
+}
+
+/* ── Dashboard recent-transactions section header ────── */
+.section-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.section-row h2 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+}
+
+/* ── Filter bar: full-width stack on mobile ───────────── */
+@media (max-width: 640px) {
+  .filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .filter-bar .input,
+  .filter-bar .select {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+  .filter-bar .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* ── Mobile card layout for tables ───────────────────── */
+@media (max-width: 640px) {
+  .table-card-mobile thead {
+    display: none;
+  }
+
+  .table-card-mobile,
+  .table-card-mobile tbody {
+    display: block;
+    width: 100%;
+  }
+
+  .table-card-mobile tbody tr {
+    display: block;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    margin-bottom: 10px;
+    padding: 12px 16px;
+  }
+  .table-card-mobile tbody tr:last-child {
+    margin-bottom: 0;
+  }
+
+  .table-card-mobile td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    font-size: 13px;
+    color: var(--text-secondary);
+    min-height: 28px;
+    gap: 8px;
+  }
+  .table-card-mobile td:last-child {
+    border-bottom: none;
+    justify-content: flex-end;
+    padding-top: 10px;
+  }
+
+  .table-card-mobile td::before {
+    content: attr(data-label);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+  .table-card-mobile td:last-child::before {
+    content: none;
+  }
+
+  /* Remove table container card style — cards replace it */
+  .table-container:has(.table-card-mobile) {
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    overflow: visible;
+  }
+}
+
+/* ── Budget grid: single column on small screens ─────── */
+@media (max-width: 480px) {
+  .budget-grid {
+    grid-template-columns: 1fr;
+  }
+  .budget-card {
+    padding: 18px;
+  }
+}
+
+/* ── Settings: password inputs full-width on mobile ──── */
+.settings-pw-input {
+  max-width: 400px;
+  width: 100%;
+}
+@media (max-width: 480px) {
+  .settings-pw-input {
+    max-width: 100%;
+  }
+}
+
+/* ── Settings: profile row vertical on tiny screens ──── */
+.settings-profile-row {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+@media (max-width: 400px) {
+  .settings-profile-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+}
+
+/* ── Settings / Budgets: inline form rows ─────────────── */
+.form-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+.form-row > div {
+  flex: 1 1 160px;
+  min-width: 0;
+}
+@media (max-width: 480px) {
+  .form-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .form-row > div {
+    flex: 1 1 auto;
+    width: 100%;
+  }
+  .form-row > .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* ── Upload: file preview card ────────────────────────── */
+.file-preview-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.file-preview-info {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1;
+  min-width: 0;
+}
+.file-preview-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-sm);
+  background: var(--accent-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+.file-preview-meta {
+  min-width: 0;
+}
+.file-preview-meta p {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.file-preview-actions {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+}
+@media (max-width: 480px) {
+  .file-preview-card {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .file-preview-actions {
+    width: 100%;
+  }
+  .file-preview-actions .btn {
+    flex: 1;
+    justify-content: center;
+  }
+}
+
+/* ── Upload: import summary stats ─────────────────────── */
+.import-stats {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+/* ── Modal: bottom-sheet style on mobile ──────────────── */
+@media (max-width: 520px) {
+  .overlay {
+    padding: 0;
+    align-items: flex-end;
+  }
+  .modal {
+    padding: 24px 20px 32px;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    max-height: 92vh;
+    width: 100%;
+    max-width: 100%;
+  }
+}
+
+/* ── Modal actions: stack on tiny screens ─────────────── */
+@media (max-width: 400px) {
+  .modal-actions {
+    flex-direction: column;
+  }
+  .modal-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* ── Auth card: tighter padding on tiny screens ───────── */
+@media (max-width: 400px) {
+  .auth-card {
+    padding: 28px 20px;
+  }
+  .auth-page {
+    padding: 16px;
+  }
+}
+
+/* ── Landing: hero card stats collapse to 1-col ──────── */
+@media (max-width: 400px) {
+  .hero-card-stats {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .hero-card {
+    padding: 20px;
+    margin-top: 40px;
+  }
+}
+
+/* ── Landing: stats bar on very small screens ─────────── */
+@media (max-width: 420px) {
+  .stat-number {
+    font-size: 2rem;
+  }
+}
+
+/* ── Main content: tighter padding on tiny screens ────── */
+@media (max-width: 360px) {
+  .main-content {
+    padding: 14px 12px;
+  }
+}

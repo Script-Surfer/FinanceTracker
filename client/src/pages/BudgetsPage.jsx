@@ -125,11 +125,11 @@ const BudgetsPage = () => {
           <div className="form-card animate-in">
             <h2 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16 }}>Set monthly budget</h2>
             {formError && <div className="error-box">{formError}</div>}
-            <form
+          <form
               onSubmit={handleSubmit}
-              style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'flex-end' }}
+              className="form-row"
             >
-              <div style={{ flex: '1 1 160px' }}>
+              <div>
                 <label className="label">Category</label>
                 <select
                   className="select"
@@ -139,7 +139,7 @@ const BudgetsPage = () => {
                   {CATEGORIES.map(c => <option key={c}>{c}</option>)}
                 </select>
               </div>
-              <div style={{ flex: '1 1 160px' }}>
+              <div>
                 <label className="label">Monthly limit ({currency})</label>
                 <input
                   className="input"
