@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Transaction = require('../models/transactions.models');
 
 const CATEGORIES = [
@@ -44,9 +45,9 @@ const createTransaction = async (req,res) => {
     try {
         const {amount,type,category,description,date} = req.body;
 
-        if(!amount || !type || !category || !description || !date){
+        if(!amount || !type || !category || !date){
             return res.status(400).json({
-                message: "Amount,type,date,description,category is missing."
+                message: "Amount, type, date, and category are required."
             })
         }
 
@@ -58,13 +59,13 @@ const createTransaction = async (req,res) => {
 
         if(!CATEGORIES.includes(category)){
             return res.status(400).json({
-                message: "Category must from the defined list."
+                message: "Category must be from the defined list."
             })
         }
 
         if(Number(amount) <= 0){
             return res.status(400).json({
-                message: "Amount must be positive Number."
+                message: "Amount must be a positive number."
             })
         }
 
@@ -87,13 +88,10 @@ const createTransaction = async (req,res) => {
 
 const updateTransaction = async (req,res) => {
     try {
-        // const transaction = await Transaction.findOne({
-        //     _id: req.params.id,
-        //     userId: req.user._id,
-        // });
-
-        const transaction = await Transaction.findById(req.params.id);
-        console.log(transaction);
+        const transaction = await Transaction.findOne({
+            _id: req.params.id,
+            userId: req.user.id,
+        });
 
         if(!transaction){
             return res.status(404).json({
@@ -105,11 +103,11 @@ const updateTransaction = async (req,res) => {
 
         if(type && !['income','expense'].includes(type)){
             return res.status(400).json({
-                message: "type must be income or expense."
+                message: "Type must be income or expense."
             });
         }
 
-        if(category && ![CATEGORIES].includes(type)){
+        if(category && !CATEGORIES.includes(category)){
             return res.status(400).json({
                 message: "Invalid category."
             });
@@ -117,21 +115,21 @@ const updateTransaction = async (req,res) => {
 
         if(amount !== undefined && Number(amount) <= 0){
             return res.status(400).json({
-                message: "Number should be positive."
+                message: "Amount must be a positive number."
             });
         }
 
-        transaction.amount = amount ? Number(amount) : transaction.amount;
-        transaction.type = type || transaction.type;
-        transaction.category = category || transaction.category;
+        transaction.amount      = amount      ? Number(amount)  : transaction.amount;
+        transaction.type        = type        || transaction.type;
+        transaction.category    = category    || transaction.category;
         transaction.description = description ?? transaction.description;
-        transaction.date = date ? new Date(date) : transaction.date;
+        transaction.date        = date        ? new Date(date)  : transaction.date;
 
         await transaction.save();
         res.json(transaction);
     } catch (err) {
         res.status(500).json({
-            message: 'server error', error: err.message
+            message: 'Server error', error: err.message
         });
     }
 };
@@ -154,40 +152,85 @@ const deleteTransaction = async (req,res) => {
         });
     } catch (err) {
         res.status(500).json({
-            message: 'server error', error: err.message
+            message: 'Server error', error: err.message
         });
     }
 };
 
 const getSummary = async (req, res) => {
   try {
-    const now   = new Date();
-    const start = new Date(now.getFullYear(), now.getMonth(), 1);
-    const end   = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    const userId = new mongoose.Types.ObjectId(req.user.id);
+    const now    = new Date();
 
-    const result = await Transaction.aggregate([
+    // ── Current month totals ──────────────────────────────────
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const monthEnd   = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+
+    const monthResult = await Transaction.aggregate([
+      { $match: { userId, date: { $gte: monthStart, $lte: monthEnd } } },
+      { $group: { _id: '$type', total: { $sum: '$amount' } } },
+    ]);
+
+    const income   = monthResult.find(r => r._id === 'income')?.total  || 0;
+    const expenses = monthResult.find(r => r._id === 'expense')?.total || 0;
+
+    // ── Category breakdown (expense only, current month) ──────
+    const categoryBreakdown = await Transaction.aggregate([
       {
         $match: {
-          userId: req.user.id,
-          date:   { $gte: start, $lte: end },
+          userId,
+          type: 'expense',
+          date: { $gte: monthStart, $lte: monthEnd },
         },
       },
+      { $group: { _id: '$category', total: { $sum: '$amount' } } },
+      { $sort:  { total: -1 } },
+    ]);
+
+    // ── 6-month income/expense trend ──────────────────────────
+    const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1);
+
+    const trendRaw = await Transaction.aggregate([
+      { $match: { userId, date: { $gte: sixMonthsAgo } } },
       {
         $group: {
-          _id:   '$type',
+          _id: {
+            year:  { $year:  '$date' },
+            month: { $month: '$date' },
+            type:  '$type',
+          },
           total: { $sum: '$amount' },
         },
       },
+      { $sort: { '_id.year': 1, '_id.month': 1 } },
     ]);
 
-    const income   = result.find(r => r._id === 'income')?.total  || 0;
-    const expenses = result.find(r => r._id === 'expense')?.total || 0;
+    // Build ordered 6-month array
+    const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const monthlyTrend = [];
+    for (let i = 5; i >= 0; i--) {
+      const d   = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const yr  = d.getFullYear();
+      const mo  = d.getMonth() + 1; // 1-indexed
+      const key = MONTH_NAMES[d.getMonth()];
+
+      const expEntry = trendRaw.find(r => r._id.year === yr && r._id.month === mo && r._id.type === 'expense');
+      const incEntry = trendRaw.find(r => r._id.year === yr && r._id.month === mo && r._id.type === 'income');
+
+      monthlyTrend.push({
+        month:    key,
+        expenses: expEntry?.total || 0,
+        income:   incEntry?.total || 0,
+      });
+    }
 
     res.json({
       income,
       expenses,
-      balance:     income - expenses,
-      savingsRate: income > 0 ? (((income - expenses) / income) * 100).toFixed(1) : 0,
+      balance:          income - expenses,
+      savingsRate:      income > 0 ? (((income - expenses) / income) * 100).toFixed(1) : 0,
+      categoryBreakdown,
+      monthlyTrend,
     });
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });

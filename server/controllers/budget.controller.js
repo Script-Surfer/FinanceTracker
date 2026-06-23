@@ -1,3 +1,4 @@
+    const mongoose = require('mongoose');
     const Budget = require("../models/budget.models");
     const Transaction = require('../models/transactions.models');
 
@@ -15,7 +16,7 @@
             const spending = await Transaction.aggregate([
                 {
                     $match: {
-                        userId: req.user.id,
+                        userId: new mongoose.Types.ObjectId(req.user.id),
                         type: 'expense',
                         date: {$gte: start, $lte: end},
                     },
@@ -93,6 +94,8 @@
                     message: 'Budget not found',
                 });
             }
+
+            res.json({ message: 'Budget deleted' });
         } catch (err) {
             return res.status(500).json({
                 message: "Server error",

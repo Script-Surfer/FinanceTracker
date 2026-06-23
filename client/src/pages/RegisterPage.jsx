@@ -1,178 +1,157 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
-import api from "../api/axios";
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import api from '../api/axios';
+import ThemeToggle from '../components/ThemeToggle';
 
 const RegisterPage = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
 
   const [form, setForm] = useState({
-    name: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
   });
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleChange = (e) =>
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const validate = () => {
     if (!form.name || !form.email || !form.password || !form.confirmPassword) {
-      return "All fields are required.";
+      return 'All fields are required.';
     }
     if (form.password.length < 6) {
-      return "Password length must be at least 6 characters.";
+      return 'Password must be at least 6 characters.';
     }
-    if (form.password != form.confirmPassword) {
-      return "Passwords do not match.";
+    if (form.password !== form.confirmPassword) {
+      return 'Passwords do not match.';
     }
     return null;
   };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
-
+    setError('');
     const validationError = validate();
     if (validationError) return setError(validationError);
 
     setLoading(true);
     try {
-      const { data } = await api.post("/auth/register", form);
-      login(data.token, data.user); // store token + set user in context
-      navigate("/dashboard", { replace: true });
+      const { data } = await api.post('/auth/register', form);
+      login(data.token, data.user);
+      navigate('/dashboard', { replace: true });
     } catch (err) {
-      setError(err.response?.data?.message || "Registration failed");
+      setError(err.response?.data?.message || 'Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div style={styles.page}>
-      <div style={styles.card}>
-        <h2 style={styles.title}>Create account</h2>
-        <p style={styles.sub}>Personal Finance Tracker</p>
+    <div className="auth-page">
+      {/* Theme toggle — fixed top-right */}
+      <div style={{ position: 'fixed', top: 20, right: 20, zIndex: 200 }}>
+        <ThemeToggle />
+      </div>
 
-        {error && <div style={styles.errorBox}>{error}</div>}
+      {/* Back to home */}
+      <Link
+        to="/"
+        style={{
+          position: 'fixed', top: 22, left: 24, zIndex: 200,
+          fontSize: 13, color: 'var(--text-muted)',
+          display: 'flex', alignItems: 'center', gap: 6,
+          textDecoration: 'none',
+        }}
+      >
+        ← Home
+      </Link>
 
-        <form onSubmit={handleSubmit} style={styles.form}>
-          <Field
-            label="Full name"
-            name="name"
-            type="text"
-            value={form.name}
-            onChange={handleChange}
-          />
-          <Field
-            label="Email"
-            name="email"
-            type="email"
-            value={form.email}
-            onChange={handleChange}
-          />
-          <Field
-            label="Password"
-            name="password"
-            type="password"
-            value={form.password}
-            onChange={handleChange}
-          />
-          <Field
-            label="Confirm password"
-            name="confirmPassword"
-            type="password"
-            value={form.confirmPassword}
-            onChange={handleChange}
-          />
+      <div className="auth-card animate-in">
+        <div className="auth-logo">💰 FinTracker</div>
+        <h1 className="auth-title">Create account</h1>
+        <p className="auth-subtitle">Start tracking your finances today</p>
 
-          <button type="submit" disabled={loading} style={styles.btn}>
-            {loading ? "Creating account…" : "Register"}
+        {error && <div className="error-box">{error}</div>}
+
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label className="label" htmlFor="reg-name">Full name</label>
+            <input
+              id="reg-name"
+              className="input"
+              name="name"
+              type="text"
+              value={form.name}
+              onChange={handleChange}
+              placeholder="John Doe"
+              required
+              autoComplete="name"
+            />
+          </div>
+          <div className="form-group">
+            <label className="label" htmlFor="reg-email">Email</label>
+            <input
+              id="reg-email"
+              className="input"
+              name="email"
+              type="email"
+              value={form.email}
+              onChange={handleChange}
+              placeholder="you@example.com"
+              required
+              autoComplete="email"
+            />
+          </div>
+          <div className="form-group">
+            <label className="label" htmlFor="reg-password">Password</label>
+            <input
+              id="reg-password"
+              className="input"
+              name="password"
+              type="password"
+              value={form.password}
+              onChange={handleChange}
+              placeholder="Min. 6 characters"
+              required
+              autoComplete="new-password"
+            />
+          </div>
+          <div className="form-group">
+            <label className="label" htmlFor="reg-confirm">Confirm password</label>
+            <input
+              id="reg-confirm"
+              className="input"
+              name="confirmPassword"
+              type="password"
+              value={form.confirmPassword}
+              onChange={handleChange}
+              placeholder="Repeat password"
+              required
+              autoComplete="new-password"
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="btn btn-primary"
+            disabled={loading}
+            style={{ width: '100%', marginTop: 8 }}
+          >
+            {loading ? 'Creating account…' : 'Create account'}
           </button>
         </form>
 
-        <p style={styles.footer}>
-          Already have an account? <Link to="/login">Log in</Link>
+        <p className="auth-footer">
+          Already have an account?{' '}
+          <Link to="/login">Sign in</Link>
         </p>
       </div>
     </div>
   );
-};
-
-// ── reusable field component ──────────────────────────────
-const Field = ({ label, name, type, value, onChange }) => (
-  <div style={{ marginBottom: 14 }}>
-    <label style={styles.label}>{label}</label>
-    <input
-      name={name}
-      type={type}
-      value={value}
-      onChange={onChange}
-      required
-      style={styles.input}
-    />
-  </div>
-);
-
-// ── inline styles (no CSS file needed for now) ────────────
-const styles = {
-  page: {
-    minHeight: "100vh",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    background: "#f5f5f5",
-  },
-  card: {
-    background: "#fff",
-    borderRadius: 12,
-    padding: "36px 40px",
-    width: "100%",
-    maxWidth: 400,
-    border: "1px solid #e5e5e5",
-  },
-  title: { margin: "0 0 4px", fontSize: 22, fontWeight: 600 },
-  sub: { margin: "0 0 24px", fontSize: 13, color: "#888" },
-  form: { display: "flex", flexDirection: "column" },
-  label: {
-    display: "block",
-    fontSize: 13,
-    fontWeight: 500,
-    marginBottom: 5,
-    color: "#444",
-  },
-  input: {
-    width: "100%",
-    padding: "9px 12px",
-    borderRadius: 8,
-    border: "1px solid #ddd",
-    fontSize: 14,
-    boxSizing: "border-box",
-    outline: "none",
-  },
-  btn: {
-    marginTop: 8,
-    padding: "10px",
-    borderRadius: 8,
-    background: "#2563eb",
-    color: "#fff",
-    border: "none",
-    fontSize: 14,
-    fontWeight: 500,
-    cursor: "pointer",
-  },
-  errorBox: {
-    background: "#fef2f2",
-    border: "1px solid #fecaca",
-    color: "#dc2626",
-    borderRadius: 8,
-    padding: "10px 14px",
-    fontSize: 13,
-    marginBottom: 16,
-  },
-  footer: { textAlign: "center", fontSize: 13, color: "#666", marginTop: 20 },
 };
 
 export default RegisterPage;
