@@ -8,7 +8,7 @@ const ProtectedRoute = ({ children }) => {
     return (
       <div className="loading-center" style={{ minHeight: '100vh' }}>
         <div className="spinner" />
-      </div>
+      </div> 
     );
   }
 
